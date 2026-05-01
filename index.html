@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bolinha Copa 2026</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/6.6.6/css/flag-icons.min.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+
+<body>
+
+  <!-- LOADING -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Conectando...</div>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-box">
+      <div class="login-trophy"><img src="logo.avif" alt="Copa 2026 Logo"></div>
+      <div class="login-title">Bolinha Copa 2026</div>
+      <div class="login-sub">Copa do Mundo FIFA 2026</div>
+
+      <div class="login-field">
+        <label>Seu nome</label>
+        <input type="text" id="login-name" placeholder="Seu nome" maxlength="30" autocomplete="off">
+      </div>
+      <div class="login-field">
+        <label>PIN de 4 dígitos</label>
+        <input type="password" id="login-pin" placeholder="••••" maxlength="4" inputmode="numeric" pattern="[0-9]*">
+        <div class="login-hint">Na primeira vez, crie seu PIN. Nas próximas vezes, use o mesmo PIN e o mesmo Nome
+          para acessar suas apostas em qualquer dispositivo.</div>
+      </div>
+
+      <button class="login-btn" onclick="doLogin()">Entrar →</button>
+      <div class="login-error" id="login-error"></div>
+      <div class="login-footer">🔒 Suas apostas ficam salvas na nuvem</div>
+    </div>
+  </div>
+
+  <!-- SYNC BAR -->
+  <div class="sync-bar" id="sync-bar"></div>
+
+  <header>
+    <div class="header-top">
+      <div class="header-brand">
+        <div class="header-icon"><img src="logo.avif" alt="Copa 2026 Logo"></div>
+        <div class="header-title-wrap">
+          <div class="header-title">Bolinha Copa 2026</div>
+          <div class="header-sub">EUA · México · Canadá</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="user-chip">
+          <div class="user-chip-avatar" id="hdr-avatar">?</div>
+          <span class="user-chip-name" id="hdr-name">—</span>
+          <button class="user-chip-out" onclick="doLogout()" title="Sair">✕</button>
+        </div>
+        <div class="online-dot">
+          <span id="conn-dot"></span>
+          <span id="conn-label">...</span>
+        </div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('grupos',this)">⚽ Grupos</button>
+      <button class="tab" onclick="showTab('mata',this)">🏆 Mata-Mata</button>
+      <button class="tab" onclick="showTab('placar',this)">📊 Placar</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- GRUPOS -->
+    <section id="grupos" class="section active">
+      <div class="sec-head">
+        <h2>⚽ Fase de Grupos</h2>
+        <p>Preveja o placar de todos os jogos</p>
+      </div>
+      <div class="locked-banner hidden" id="grupos-locked-banner">🔒 Apostas encerradas — você pode ver os palpites mas
+        não alterar</div>
+      <div class="rules-box">
+        <div class="rule-item"><span class="rb">3 pts</span><span class="rt">Acertar o placar exato</span></div>
+        <div class="rule-item"><span class="rb">1 pt</span><span class="rt">Acertar vencedor ou empate (errou placar)</span></div>
+      </div>
+      <div id="grupos-deadline"></div>
+      <div id="grupos-render" class="grupos-grid"></div>
+      <div style="text-align:center;margin-top:1.5rem;">
+        <button class="btn btn-gold" id="grupos-save-btn" onclick="saveGrupos()">💾 Salvar apostas dos grupos</button>
+      </div>
+    </section>
+
+    <!-- MATA-MATA -->
+    <section id="mata" class="section">
+      <div class="sec-head">
+        <h2>🏆 Mata-Mata</h2>
+        <p>Preveja o placar das partidas</p>
+      </div>
+      <div class="locked-banner hidden" id="mata-locked-banner">🔒 Apostas encerradas — você pode ver os palpites mas
+        não alterar</div>
+      <div class="rules-box">
+        <div class="rule-item"><span class="rb">3 pts</span><span class="rt">Acertar o placar exato</span></div>
+        <div class="rule-item"><span class="rb">1 pt</span><span class="rt">Acertar vencedor ou empate (errou placar)</span></div>
+      </div>
+      <div id="mata-render"></div>
+      <div style="text-align:center;margin-top:1.5rem;">
+        <button class="btn btn-gold" id="mata-save-btn" onclick="saveMata()">💾 Salvar apostas do mata-mata</button>
+      </div>
+    </section>
+
+    <!-- PLACAR -->
+    <section id="placar" class="section">
+      <div class="sec-head">
+        <h2>📊 Placar Geral</h2>
+        <p>Atualizado em tempo real</p>
+      </div>
+      <div id="placar-render" class="rank-grid"></div>
+      <div style="text-align:center;margin-top:1.5rem;">
+        <button class="btn btn-outline" onclick="renderPlacar()">🔄 Atualizar</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js" type="module"></script>
+</body>
+
+</html>

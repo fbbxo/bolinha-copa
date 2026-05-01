@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Bolinha Copa 2026</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/6.6.6/css/flag-icons.min.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <div class="admin-login" id="admin-login">
+    <div class="admin-login-box">
+      <div class="al-icon">⚙️</div>
+      <div class="al-title">Painel do Admin</div>
+      <div class="al-sub">Bolinha Copa 2026</div>
+      <input type="password" id="admin-pass" placeholder="Senha do administrador" class="al-input">
+      <button class="al-btn" onclick="adminLogin()">Entrar →</button>
+      <div id="admin-err" class="al-err"></div>
+    </div>
+  </div>
+
+  <div id="admin-panel" class="hidden">
+    <header class="admin-header">
+      <div class="ah-brand">
+        <img src="logo.avif" alt="Copa 2026" class="ah-logo">
+        <div>
+          <div class="ah-title">Painel do Administrador</div>
+          <div class="ah-sub">Bolinha Copa 2026</div>
+        </div>
+      </div>
+      <div class="ah-right">
+        <span id="admin-status"></span>
+        <button class="btn btn-outline btn-sm" onclick="window.location.href='index.html'">← Voltar ao jogo</button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+
+      <section class="admin-section">
+        <h2>🔒 Bloqueios e Prazos</h2>
+        <p class="sec-desc">Bloqueie manualmente as apostas de cada fase, ou defina um prazo automático.</p>
+        <div class="lock-grid" id="lock-grid"></div>
+        <button class="btn btn-gold" onclick="saveLocks()">💾 Salvar bloqueios</button>
+      </section>
+
+      <section class="admin-section">
+        <h2>⚽ Resultados — Fase de Grupos</h2>
+        <p class="sec-desc">Informe o placar real de cada partida disputada nos grupos.</p>
+        <div class="grupos-res-grid" id="grupos-res-grid"></div>
+        <button class="btn btn-gold" onclick="saveGruposResults()">💾 Salvar resultados dos grupos</button>
+      </section>
+
+      <section class="admin-section">
+        <h2>🗓️ Confrontos do Mata-Mata</h2>
+        <p class="sec-desc">Configure quem joga contra quem em cada rodada. Só depois de salvar, os apostadores poderão fazer suas escolhas.</p>
+        <div id="admin-mata-matches"></div>
+        <button class="btn btn-gold" onclick="saveMatchups()">💾 Salvar confrontos</button>
+      </section>
+
+      <section class="admin-section">
+        <h2>✅ Resultados — Mata-Mata</h2>
+        <p class="sec-desc">Informe o placar real de cada partida para pontuar os apostadores automaticamente.</p>
+        <div id="admin-mata-results"></div>
+        <button class="btn btn-gold" onclick="saveMataResults()">💾 Salvar placares do mata-mata</button>
+      </section>
+
+      <section class="admin-section">
+        <h2>👥 Apostadores cadastrados</h2>
+        <div id="players-list" style="margin-bottom:1rem;"></div>
+        <button class="btn btn-outline" onclick="loadPlayers()">🔄 Atualizar lista</button>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="toast" id="admin-toast"></div>
+  <script src="admin.js" type="module"></script>
+</body>
+</html>
