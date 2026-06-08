@@ -219,7 +219,7 @@ function renderGrupoCard(g, locked) {
     if (res && res.h !== '' && res.a !== '') {
       let rH = parseInt(res.h), rA = parseInt(res.a);
       let pH = parseInt(pick.h), pA = parseInt(pick.a);
-      if (!isNaN(pH) && !isNaN(pA)) {
+      if (!isNaN(pH) && !isNaN(pA) && !isNaN(rH) && !isNaN(rA)) {
         if (rH === pH && rA === pA) {
           cls += ' gm-correct-exact';
         } else {
@@ -332,7 +332,7 @@ function renderMataMatch(roundKey, idx, matchup, result, locked) {
   if (result && result.h !== undefined && result.h !== '' && result.a !== '') {
       let rH = parseInt(result.h), rA = parseInt(result.a);
       let pH = parseInt(pick.h), pA = parseInt(pick.a);
-      if (!isNaN(pH) && !isNaN(pA)) {
+      if (!isNaN(pH) && !isNaN(pA) && !isNaN(rH) && !isNaN(rA)) {
         if (rH === pH && rA === pA) {
           cls += ' gm-correct-exact';
         } else {
@@ -404,7 +404,7 @@ function calcScore(player) {
       if (res && res.h !== '' && res.a !== '' && pick && pick.h !== '' && pick.a !== '') {
         const rH = parseInt(res.h), rA = parseInt(res.a);
         const pH = parseInt(pick.h), pA = parseInt(pick.a);
-        if (!isNaN(pH) && !isNaN(pA)) {
+        if (!isNaN(pH) && !isNaN(pA) && !isNaN(rH) && !isNaN(rA)) {
           if (rH === pH && rA === pA) {
              pts += 3; details.grupos += 3;
           } else {
@@ -429,7 +429,7 @@ function calcScore(player) {
       if (res && res.h !== undefined && res.h !== '' && res.a !== '' && pick && typeof pick === 'object' && pick.h !== '' && pick.a !== '') {
         const rH = parseInt(res.h), rA = parseInt(res.a);
         const pH = parseInt(pick.h), pA = parseInt(pick.a);
-        if (!isNaN(pH) && !isNaN(pA)) {
+        if (!isNaN(pH) && !isNaN(pA) && !isNaN(rH) && !isNaN(rA)) {
           if (rH === pH && rA === pA) {
             pts += 3; details.mata += 3;
           } else {
