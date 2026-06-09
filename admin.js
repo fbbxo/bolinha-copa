@@ -151,46 +151,31 @@ window.saveLocks = async function() {
 
 // ── RESULTADOS DOS GRUPOS ──
 function renderGruposResults() {
-  const rounds = [
-    { label: 'RODADA 1', matches: [0, 1] },
-    { label: 'RODADA 2', matches: [2, 3] },
-    { label: 'RODADA 3', matches: [4, 5] },
-  ];
-  
-  let html = '';
-  for (const r of rounds) {
-    html += `<div class="admin-round-section" style="margin-bottom: 2rem;">
-      <h3 style="background:var(--surface); padding:0.5rem; border-radius:6px; margin-bottom:1rem;">${r.label}</h3>
-      <div class="grupos-res-grid">`;
-      
-    for (const g of GROUP_KEYS) {
-      const teams = DEFAULT_GROUPS[g];
-      const res   = S.results.grupos?.[g] || {};
-      const allMatches = [ [0,1], [2,3], [0,2], [1,3], [0,3], [1,2] ];
-      
-      let rows = r.matches.map(i => {
-         const m = allMatches[i];
-         const tH = teams[m[0]];
-         const tA = teams[m[1]];
-         const rData = res[`m${i}`] || { h: '', a: '' };
-         return `<div class="grc-match">
-           <div class="grcm-team grcm-home">${tH} ${flag(tH, 20)}</div>
-           <input type="number" id="gres-${g}-m${i}-h" value="${rData.h}" min="0" max="20" class="grcm-input">
-           <span class="grcm-x">x</span>
-           <input type="number" id="gres-${g}-m${i}-a" value="${rData.a}" min="0" max="20" class="grcm-input">
-           <div class="grcm-team grcm-away">${flag(tA, 20)} ${tA}</div>
-         </div>`;
-      }).join('');
-      
-      html += `<div class="grupo-res-card">
-        <div class="grc-header">GRUPO ${g}</div>
-        <div class="grc-body">${rows}</div>
-      </div>`;
-    }
+  document.getElementById('grupos-res-grid').innerHTML = GROUP_KEYS.map(g => {
+    const teams = DEFAULT_GROUPS[g];
+    const res   = S.results.grupos?.[g] || {};
+    const matches = [ [0,1], [2,3], [0,2], [1,3], [0,3], [1,2] ];
     
-    html += `</div></div>`;
-  }
-  document.getElementById('grupos-res-grid').innerHTML = html;
+    let rows = matches.map((m, i) => {
+      const tH = teams[m[0]];
+      const tA = teams[m[1]];
+      const r = res[`m${i}`] || { h: '', a: '' };
+      return `<div class="grc-match">
+        <div class="grcm-team grcm-home">${tH} ${flag(tH, 20)}</div>
+        <input type="number" id="gres-${g}-m${i}-h" value="${r.h}" min="0" max="20" class="grcm-input">
+        <span class="grcm-x">x</span>
+        <input type="number" id="gres-${g}-m${i}-a" value="${r.a}" min="0" max="20" class="grcm-input">
+        <div class="grcm-team grcm-away">${flag(tA, 20)} ${tA}</div>
+      </div>`;
+    }).join('');
+
+    return `<div class="grupo-res-card">
+      <div class="grc-header">GRUPO ${g}</div>
+      <div class="grc-body">
+        ${rows}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 window.saveGruposResults = async function() {
