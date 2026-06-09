@@ -195,20 +195,47 @@ function renderAll() {
 //  GRUPOS
 // ═══════════════════════════════════════════════════
 function renderGrupos() {
-  const locked = isLocked('grupos');
-  document.getElementById('grupos-locked-banner').classList.toggle('hidden', !locked);
-  document.getElementById('grupos-save-btn').style.display = locked ? 'none' : 'inline-block';
-  document.getElementById('grupos-deadline').textContent = getDeadlineStr('grupos');
+  const lockedR1 = isLocked('grupos_r1');
+  const lockedR2 = isLocked('grupos_r2');
+  const lockedR3 = isLocked('grupos_r3');
+  const allLocked = lockedR1 && lockedR2 && lockedR3;
+
+  document.getElementById('grupos-locked-banner').classList.toggle('hidden', !allLocked);
+  document.getElementById('grupos-save-btn').style.display = allLocked ? 'none' : 'inline-block';
+  document.getElementById('grupos-deadline').textContent = '';
+
+  const rounds = [
+    { label: 'RODADA 1', matches: [0, 1], locked: lockedR1, dl: getDeadlineStr('grupos_r1') },
+    { label: 'RODADA 2', matches: [2, 3], locked: lockedR2, dl: getDeadlineStr('grupos_r2') },
+    { label: 'RODADA 3', matches: [4, 5], locked: lockedR3, dl: getDeadlineStr('grupos_r3') },
+  ];
 
   const el = document.getElementById('grupos-render');
-  el.innerHTML = GROUP_KEYS.map(g => renderGrupoCard(g, locked)).join('');
+  let html = '';
+  for (const r of rounds) {
+    html += `<div class="rodada-section" style="margin-bottom: 2rem;">
+      <div style="background: var(--surface); padding: 1rem; border-radius: 8px; text-align: center; margin-bottom: 1rem; border: 1px solid var(--border);">
+        <h3 style="margin:0; color:var(--gold);">${r.label} ${r.locked ? '🔒' : ''}</h3>
+        ${r.dl ? `<div style="font-size:0.8rem; color:var(--muted); margin-top:0.3rem;">${r.dl}</div>` : ''}
+      </div>
+      <div class="grupos-grid">`;
+      
+    for (const g of GROUP_KEYS) {
+       html += renderRodadaGrupo(g, r.matches, r.locked);
+    }
+    
+    html += `</div></div>`;
+  }
+  
+  el.innerHTML = html;
 }
 
-function renderGrupoCard(g, locked) {
+function renderRodadaGrupo(g, matchIndices, locked) {
   const teams = S.groups[g] || DEFAULT_GROUPS[g];
-  const matches = [ [0,1], [2,3], [0,2], [1,3], [0,3], [1,2] ];
+  const allMatchesDef = [ [0,1], [2,3], [0,2], [1,3], [0,3], [1,2] ];
 
-  const matchesHTML = matches.map((m, i) => {
+  let matchesHTML = matchIndices.map(i => {
+    const m = allMatchesDef[i];
     const tH = teams[m[0]];
     const tA = teams[m[1]];
     const pick = ME.grupos[g]?.[`m${i}`] || { h: '', a: '' };
@@ -265,14 +292,19 @@ function renderGrupoCard(g, locked) {
 }
 
 window.pickGrpScore = function(g, mIdx, side, val) {
-  if (isLocked('grupos')) return;
+  let lockKey = 'grupos_r1';
+  if (mIdx === 2 || mIdx === 3) lockKey = 'grupos_r2';
+  if (mIdx === 4 || mIdx === 5) lockKey = 'grupos_r3';
+  if (isLocked(lockKey)) return;
+
   if (!ME.grupos[g]) ME.grupos[g] = {};
   if (!ME.grupos[g][`m${mIdx}`]) ME.grupos[g][`m${mIdx}`] = { h: '', a: '' };
   ME.grupos[g][`m${mIdx}`][side] = val;
 };
 
 window.saveGrupos = async function() {
-  if (isLocked('grupos')) return;
+  const allLocked = isLocked('grupos_r1') && isLocked('grupos_r2') && isLocked('grupos_r3');
+  if (allLocked) return;
   try {
     await setDoc(doc(PLAYERS_COL, ME.id), { grupos: ME.grupos }, { merge: true });
     toast('✅ Apostas dos grupos salvas!');
