@@ -224,7 +224,15 @@ function renderGrupos() {
        html += renderRodadaGrupo(g, r.matches, r.locked);
     }
     
-    html += `</div></div>`;
+    html += `</div>`;
+    
+    if (!r.locked) {
+      html += `<div style="text-align:center; margin-top:1.5rem;">
+        <button class="btn btn-gold" onclick="saveGrupos()">💾 Salvar apostas da ${r.label}</button>
+      </div>`;
+    }
+    
+    html += `</div>`;
   }
   
   el.innerHTML = html;
