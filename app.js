@@ -226,7 +226,7 @@ function renderGrupos() {
     
     html += `</div>`;
     
-    if (!r.locked) {
+    if (!r.locked && r.label !== 'RODADA 3') {
       html += `<div style="text-align:center; margin-top:1.5rem;">
         <button class="btn btn-gold" onclick="saveGrupos()">💾 Salvar apostas da ${r.label}</button>
       </div>`;
