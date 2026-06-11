@@ -245,6 +245,7 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 1rem 5rem; }
 .gm-input:focus { outline: none; border-color: var(--navy2); }
 .gm-input:disabled { background: var(--light); color: var(--muted); opacity: 1; }
 .gm-x { font-size: .75rem; font-weight: 800; color: var(--muted); }
+.gm-date { font-size: .65rem; font-weight: 700; text-align: center; color: var(--muted); margin-bottom: 6px; letter-spacing: 1px; text-transform: uppercase; }
 .gm-res { font-size: .7rem; font-weight: 700; text-align: center; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); }
 .gm-correct-exact { border-color: var(--green); background: #f0fdf4; }
 .gm-correct-exact .gm-res { color: var(--green); }

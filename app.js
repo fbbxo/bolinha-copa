@@ -24,7 +24,7 @@ const db    = getFirestore(fbApp);
 // CSS carregado no index.html: flag-icons.min.css
 // Uso: <span class="fi fi-br"></span>  →  bandeira do Brasil
 const FLAG_CODES = {
-  'México':'mx','África do Sul':'za','Coreia do Sul':'kr','Dinamarca':'dk',
+  'México':'mx','África do Sul':'za','Coreia do Sul':'kr','República Tcheca':'cz',
   'Canadá':'ca','Bósnia':'ba','Catar':'qa','Suíça':'ch',
   'Brasil':'br','Marrocos':'ma','Haiti':'ht','Escócia':'gb-sct',
   'Estados Unidos':'us','Paraguai':'py','Austrália':'au','Turquia':'tr',
@@ -49,7 +49,7 @@ function flag(name, size) {
 
 // ── GRUPOS PADRÃO (sorteio oficial 05/12/2025) ──
 const DEFAULT_GROUPS = {
-  A: ['México','África do Sul','Coreia do Sul','Dinamarca'],
+  A: ['México','África do Sul','Coreia do Sul','República Tcheca'],
   B: ['Canadá','Bósnia','Catar','Suíça'],
   C: ['Brasil','Marrocos','Haiti','Escócia'],
   D: ['Estados Unidos','Paraguai','Austrália','Turquia'],
@@ -66,6 +66,26 @@ const GROUP_KEYS = Object.keys(DEFAULT_GROUPS);
 
 // Todos os times (para selects do pré-torneio)
 const ALL_TEAMS = Object.values(DEFAULT_GROUPS).flat();
+
+// ── DATAS DOS JOGOS (Oficiais) ──
+const MATCH_DATES = {
+  A: { m0: '11/06 - 16:00', m1: '11/06 - 23:00', m2: '18/06 - 22:00', m3: '18/06 - 13:00', m4: '24/06 - 22:00', m5: '24/06 - 22:00' },
+  B: { m0: '12/06 - 16:00', m1: '13/06 - 16:00', m2: '18/06 - 19:00', m3: '18/06 - 16:00', m4: '24/06 - 16:00', m5: '24/06 - 16:00' },
+  C: { m0: '13/06 - 19:00', m1: '13/06 - 22:00', m2: '19/06 - 21:30', m3: '19/06 - 19:00', m4: '24/06 - 19:00', m5: '24/06 - 19:00' },
+  D: { m0: '12/06 - 22:00', m1: '14/06 - 01:00', m2: '19/06 - 16:00', m3: '20/06 - 01:00', m4: '25/06 - 23:00', m5: '25/06 - 23:00' },
+  E: { m0: '14/06 - 14:00', m1: '14/06 - 20:00', m2: '20/06 - 17:00', m3: '20/06 - 21:00', m4: '25/06 - 17:00', m5: '25/06 - 17:00' },
+  F: { m0: '14/06 - 17:00', m1: '14/06 - 23:00', m2: '20/06 - 14:00', m3: '21/06 - 01:00', m4: '25/06 - 20:00', m5: '25/06 - 20:00' },
+  G: { m0: '15/06 - 16:00', m1: '15/06 - 22:00', m2: '21/06 - 16:00', m3: '21/06 - 22:00', m4: '27/06 - 00:00', m5: '27/06 - 00:00' },
+  H: { m0: '15/06 - 13:00', m1: '15/06 - 19:00', m2: '21/06 - 13:00', m3: '21/06 - 19:00', m4: '26/06 - 21:00', m5: '26/06 - 21:00' },
+  I: { m0: '16/06 - 16:00', m1: '16/06 - 19:00', m2: '22/06 - 18:00', m3: '22/06 - 21:00', m4: '26/06 - 16:00', m5: '26/06 - 16:00' },
+  J: { m0: '16/06 - 22:00', m1: '17/06 - 01:00', m2: '22/06 - 14:00', m3: '23/06 - 00:00', m4: '27/06 - 23:00', m5: '27/06 - 23:00' },
+  K: { m0: '17/06 - 14:00', m1: '17/06 - 23:00', m2: '23/06 - 14:00', m3: '23/06 - 23:00', m4: '27/06 - 20:30', m5: '27/06 - 20:30' },
+  L: { m0: '17/06 - 17:00', m1: '17/06 - 20:00', m2: '23/06 - 17:00', m3: '23/06 - 20:00', m4: '27/06 - 18:00', m5: '27/06 - 18:00' }
+};
+
+const MATA_DATES = {
+  r32: 'A definir', r16: 'A definir', qf: 'A definir', sf: 'A definir', terceiro: 'A definir', final: '19/07 - 16:00'
+};
 
 // ── RODADAS DO MATA-MATA ──
 const ROUNDS = [
@@ -220,7 +240,26 @@ function renderGrupos() {
       </div>
       <div class="grupos-grid">`;
       
-    for (const g of GROUP_KEYS) {
+    // Ordena os grupos cronologicamente pelo primeiro jogo do grupo nesta rodada
+    const sortedGroups = [...GROUP_KEYS].sort((a, b) => {
+      const getTime = (g) => {
+        let minT = Infinity;
+        r.matches.forEach(mIdx => {
+          const dateStr = MATCH_DATES[g]?.[`m${mIdx}`];
+          if (dateStr) {
+            const pts = dateStr.match(/(\d{2})\/(\d{2}).*?(\d{2}):(\d{2})/);
+            if (pts) {
+              const t = new Date(2026, parseInt(pts[2])-1, parseInt(pts[1]), parseInt(pts[3]), parseInt(pts[4])).getTime();
+              if (t < minT) minT = t;
+            }
+          }
+        });
+        return minT;
+      };
+      return getTime(a) - getTime(b);
+    });
+
+    for (const g of sortedGroups) {
        html += renderRodadaGrupo(g, r.matches, r.locked);
     }
     
@@ -273,7 +312,9 @@ function renderRodadaGrupo(g, matchIndices, locked) {
     }
 
     const dis = locked ? 'disabled' : '';
+    const dateStr = MATCH_DATES[g]?.[`m${i}`] || '';
     return `<div class="${cls}">
+      ${dateStr ? `<div class="gm-date">📅 ${dateStr}</div>` : ''}
       <div class="gm-row">
         <div class="gm-team gm-home">
           <span class="gm-name">${tH}</span>
@@ -391,8 +432,12 @@ function renderMataMatch(roundKey, idx, matchup, result, locked) {
   }
 
   const dis = locked ? 'disabled' : '';
+  const mmDateStr = MATA_DATES[roundKey] || 'A definir';
   return `<div class="${cls}" style="margin-bottom:6px;">
-    <div class="mata-match-head">${matchLabel}</div>
+    <div class="mata-match-head" style="display:flex; justify-content:space-between;">
+      <span>${matchLabel}</span>
+      <span>📅 ${mmDateStr}</span>
+    </div>
     <div class="gm-row" style="padding:8px 8px 4px 8px;">
       <div class="gm-team gm-home">
         <span class="gm-name">${tH}</span>

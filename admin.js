@@ -18,7 +18,7 @@ const fbApp = initializeApp(firebaseConfig);
 const db    = getFirestore(fbApp);
 
 const FLAG_CODES = {
-  'México':'mx','África do Sul':'za','Coreia do Sul':'kr','Dinamarca':'dk',
+  'México':'mx','África do Sul':'za','Coreia do Sul':'kr','República Tcheca':'cz',
   'Canadá':'ca','Bósnia':'ba','Catar':'qa','Suíça':'ch',
   'Brasil':'br','Marrocos':'ma','Haiti':'ht','Escócia':'gb-sct',
   'Estados Unidos':'us','Paraguai':'py','Austrália':'au','Turquia':'tr',
@@ -40,7 +40,7 @@ function flag(name, size) {
 }
 
 const DEFAULT_GROUPS = {
-  A: ['México','África do Sul','Coreia do Sul','Dinamarca'],
+  A: ['México','África do Sul','Coreia do Sul','República Tcheca'],
   B: ['Canadá','Bósnia','Catar','Suíça'],
   C: ['Brasil','Marrocos','Haiti','Escócia'],
   D: ['Estados Unidos','Paraguai','Austrália','Turquia'],
