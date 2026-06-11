@@ -84,7 +84,12 @@ const MATCH_DATES = {
 };
 
 const MATA_DATES = {
-  r32: 'A definir', r16: 'A definir', qf: 'A definir', sf: 'A definir', terceiro: 'A definir', final: '19/07 - 16:00'
+  r32: { m0:'29/06 - 17:30', m1:'30/06 - 18:00', m2:'28/06 - 16:00', m3:'29/06 - 22:00', m4:'02/07 - 20:00', m5:'02/07 - 16:00', m6:'01/07 - 21:00', m7:'01/07 - 17:00', m8:'29/06 - 14:00', m9:'30/06 - 14:00', m10:'30/06 - 22:00', m11:'01/07 - 13:00', m12:'03/07 - 19:00', m13:'03/07 - 15:00', m14:'03/07 - 00:00', m15:'03/07 - 22:30' },
+  r16: { m0:'04/07 - 18:00', m1:'04/07 - 14:00', m2:'06/07 - 16:00', m3:'06/07 - 21:00', m4:'05/07 - 17:00', m5:'05/07 - 21:00', m6:'07/07 - 13:00', m7:'07/07 - 17:00' },
+  qf: { m0:'09/07 - 17:00', m1:'10/07 - 16:00', m2:'11/07 - 18:00', m3:'11/07 - 22:00' },
+  sf: { m0:'14/07 - 16:00', m1:'15/07 - 16:00' },
+  terceiro: { m0:'18/07 - 18:00' },
+  final: { m0:'19/07 - 16:00' }
 };
 
 // ── RODADAS DO MATA-MATA ──
@@ -236,7 +241,7 @@ function renderGrupos() {
     html += `<div class="rodada-section" style="margin-bottom: 2rem;">
       <div style="background: var(--surface); padding: 1rem; border-radius: 8px; text-align: center; margin-bottom: 1rem; border: 1px solid var(--border);">
         <h3 style="margin:0; color:var(--gold);">${r.label} ${r.locked ? '🔒' : ''}</h3>
-        ${r.dl ? `<div style="font-size:0.8rem; color:var(--muted); margin-top:0.3rem;">${r.dl}</div>` : ''}
+        ${r.dl ? `<div style="font-size:0.85rem; font-weight:700; color:var(--red); margin-top:0.5rem; background:#fff5f5; border:1px solid #fca5a5; border-radius:6px; display:inline-block; padding:0.3rem 0.6rem;">${r.dl}</div>` : ''}
       </div>
       <div class="grupos-grid">`;
       
@@ -293,26 +298,31 @@ function renderRodadaGrupo(g, matchIndices, locked) {
     if (res && res.h !== '' && res.a !== '') {
       let rH = parseInt(res.h), rA = parseInt(res.a);
       let pH = parseInt(pick.h), pA = parseInt(pick.a);
+      let statusText = '';
       if (!isNaN(pH) && !isNaN(pA) && !isNaN(rH) && !isNaN(rA)) {
         if (rH === pH && rA === pA) {
           cls += ' gm-correct-exact';
+          statusText = '🔥 Na mosca! (+3 pts)';
         } else {
           let resWin = rH > rA ? 1 : (rH < rA ? -1 : 0);
           let pickWin = pH > pA ? 1 : (pH < pA ? -1 : 0);
           if (resWin === pickWin) {
             cls += ' gm-correct-winner';
+            statusText = '✔️ Acertou o vencedor (+1 pt)';
           } else {
             cls += ' gm-wrong';
+            statusText = '❌ Errou (0 pts)';
           }
         }
       } else {
          cls += ' gm-wrong';
+         statusText = '❌ Não palpitou (0 pts)';
       }
-      resHtml = `<div class="gm-res">Resultado Real: ${rH} x ${rA}</div>`;
+      resHtml = `<div class="gm-res" style="line-height:1.4;"><strong>${statusText}</strong><br>Resultado: ${rH} x ${rA}</div>`;
     }
 
-    const dis = locked ? 'disabled' : '';
     const dateStr = MATCH_DATES[g]?.[`m${i}`] || '';
+    const dis = locked ? 'disabled' : '';
     return `<div class="${cls}">
       ${dateStr ? `<div class="gm-date">📅 ${dateStr}</div>` : ''}
       <div class="gm-row">
@@ -377,18 +387,35 @@ function renderMata() {
     const matchCount = Object.keys(matchupsInRound).length;
     const isRoundLocked = isLocked(`mata_${rd.key}`);
 
+    const dlStr = getDeadlineStr(`mata_${rd.key}`);
     html += `<div class="mata-round">
-      <div class="mata-round-header">
+      <div class="mata-round-header" style="flex-direction:column; align-items:flex-start; gap:6px;">
         <div class="mata-round-title">${rd.label} ${isRoundLocked ? '🔒' : ''}</div>
+        ${dlStr ? `<div style="font-size:0.85rem; font-weight:700; color:var(--red); background:#fff5f5; border:1px solid #fca5a5; border-radius:6px; display:inline-block; padding:0.3rem 0.6rem;">${dlStr}</div>` : ''}
       </div>
       <div class="mata-matches">`;
 
     if (matchCount === 0) {
       html += `<div class="mata-empty">⏳ Aguardando definição das partidas pelo admin</div>`;
     } else {
+      let matchIndices = [];
       for (let i = 0; i < rd.count; i++) {
+        if (matchupsInRound[`m${i}`]) matchIndices.push(i);
+      }
+      
+      matchIndices.sort((a, b) => {
+        const getT = (idx) => {
+          const ds = MATA_DATES[rd.key]?.[`m${idx}`];
+          if (!ds) return Infinity;
+          const pts = ds.match(/(\d{2})\/(\d{2}).*?(\d{2}):(\d{2})/);
+          if (pts) return new Date(2026, parseInt(pts[2])-1, parseInt(pts[1]), parseInt(pts[3]), parseInt(pts[4])).getTime();
+          return Infinity;
+        };
+        return getT(a) - getT(b);
+      });
+
+      for (let i of matchIndices) {
         const m = matchupsInRound[`m${i}`];
-        if (!m) continue;
         html += renderMataMatch(rd.key, i, m, resultsInRound[`m${i}`], isRoundLocked);
       }
     }
@@ -413,26 +440,31 @@ function renderMataMatch(roundKey, idx, matchup, result, locked) {
   if (result && result.h !== undefined && result.h !== '' && result.a !== '') {
       let rH = parseInt(result.h), rA = parseInt(result.a);
       let pH = parseInt(pick.h), pA = parseInt(pick.a);
+      let statusText = '';
       if (!isNaN(pH) && !isNaN(pA) && !isNaN(rH) && !isNaN(rA)) {
         if (rH === pH && rA === pA) {
           cls += ' gm-correct-exact';
+          statusText = '🔥 Na mosca! (+3 pts)';
         } else {
           let resWin = rH > rA ? 1 : (rH < rA ? -1 : 0);
           let pickWin = pH > pA ? 1 : (pH < pA ? -1 : 0);
           if (resWin === pickWin) {
             cls += ' gm-correct-winner';
+            statusText = '✔️ Acertou o vencedor (+1 pt)';
           } else {
             cls += ' gm-wrong';
+            statusText = '❌ Errou (0 pts)';
           }
         }
       } else {
          cls += ' gm-wrong';
+         statusText = '❌ Não palpitou (0 pts)';
       }
-      resHtml = `<div class="gm-res">Resultado Real: ${rH} x ${rA}</div>`;
+      resHtml = `<div class="gm-res" style="line-height:1.4;"><strong>${statusText}</strong><br>Resultado: ${rH} x ${rA}</div>`;
   }
 
   const dis = locked ? 'disabled' : '';
-  const mmDateStr = MATA_DATES[roundKey] || 'A definir';
+  const mmDateStr = MATA_DATES[roundKey]?.[`m${idx}`] || 'A definir';
   return `<div class="${cls}" style="margin-bottom:6px;">
     <div class="mata-match-head" style="display:flex; justify-content:space-between;">
       <span>${matchLabel}</span>
@@ -458,6 +490,7 @@ function renderMataMatch(roundKey, idx, matchup, result, locked) {
 window.pickMataScore = function(mKey, side, val) {
   const roundKey = mKey.split('_')[0];
   if (isLocked(`mata_${roundKey}`)) return;
+  
   if (!ME.mata) ME.mata = {};
   if (!ME.mata[mKey] || typeof ME.mata[mKey] !== 'object') ME.mata[mKey] = { h: '', a: '' };
   ME.mata[mKey][side] = val;
