@@ -126,6 +126,19 @@
 
   </main>
 
+  <!-- PICKS MODAL -->
+  <div class="modal-overlay hidden" id="picks-modal" onclick="closePicksModal(event)">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="picks-modal-title">Palpites da Galera</h3>
+        <button class="modal-close" onclick="closePicksModal()">✕</button>
+      </div>
+      <div class="modal-body" id="picks-modal-body">
+        <!-- Picks will be rendered here -->
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
   <script src="app.js" type="module"></script>
 </body>

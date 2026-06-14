@@ -370,6 +370,43 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 1rem 5rem; }
 }
 .toast.show { opacity: 1; }
 
+/* ── MODAL PALPITES ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; padding: 1rem; backdrop-filter: blur(3px);
+}
+.modal-content {
+  background: var(--white); border-radius: var(--radius); width: 100%; max-width: 450px;
+  max-height: 85vh; display: flex; flex-direction: column; box-shadow: var(--shadow2);
+  animation: modalIn .2s ease-out;
+}
+@keyframes modalIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-header {
+  padding: 1rem 1.2rem; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.modal-header h3 { font-size: 1.1rem; font-weight: 800; color: var(--navy); }
+.modal-close { background: none; border: none; font-size: 1.2rem; font-weight: 700; color: var(--muted); cursor: pointer; padding: .2rem; }
+.modal-close:hover { color: var(--red); }
+.modal-body { padding: 1rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.pick-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .7rem 1rem; background: var(--light); border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.pick-name { font-size: .85rem; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 8px; }
+.pick-score { font-size: 1rem; font-weight: 900; color: var(--navy2); letter-spacing: 1px; }
+.pick-missing { font-size: .75rem; font-weight: 600; color: var(--muted); font-style: italic; }
+
+/* Botão ver palpites */
+.btn-picks {
+  background: none; border: none; font-size: .75rem; font-weight: 700; color: var(--navy2);
+  cursor: pointer; padding: .3rem .5rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;
+  transition: background .15s;
+}
+.btn-picks:hover { background: #eef2ff; }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 520px) {
   .header-title { font-size: 1rem; }

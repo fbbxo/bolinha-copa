@@ -111,6 +111,7 @@ let S = {
   deadlines: {},
 };
 let ME = null; // { id, name, pin, grupos:{}, mata:{} }
+let ALL_PLAYERS_CACHE = null; // Para não gastar requests ao ver palpites
 
 // ── FIREBASE REFS ──
 const MAIN_DOC    = doc(db, 'bolinha-copa', 'state');
@@ -324,7 +325,10 @@ function renderRodadaGrupo(g, matchIndices, locked) {
     const dateStr = MATCH_DATES[g]?.[`m${i}`] || '';
     const dis = locked ? 'disabled' : '';
     return `<div class="${cls}">
-      ${dateStr ? `<div class="gm-date">📅 ${dateStr}</div>` : ''}
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+        ${dateStr ? `<div class="gm-date" style="margin-bottom:0;">📅 ${dateStr}</div>` : '<div></div>'}
+        ${locked ? `<button class="btn-picks" onclick="openPicksModal('grupo', '${g}_m${i}', '${tH} x ${tA}')">👁️ Palpites</button>` : ''}
+      </div>
       <div class="gm-row">
         <div class="gm-team gm-home">
           <span class="gm-name">${tH}</span>
@@ -466,9 +470,12 @@ function renderMataMatch(roundKey, idx, matchup, result, locked) {
   const dis = locked ? 'disabled' : '';
   const mmDateStr = MATA_DATES[roundKey]?.[`m${idx}`] || 'A definir';
   return `<div class="${cls}" style="margin-bottom:6px;">
-    <div class="mata-match-head" style="display:flex; justify-content:space-between;">
-      <span>${matchLabel}</span>
-      <span>📅 ${mmDateStr}</span>
+    <div class="mata-match-head" style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; gap: 8px; align-items:center;">
+        <span>${matchLabel}</span>
+        <span>📅 ${mmDateStr}</span>
+      </div>
+      ${locked ? `<button class="btn-picks" onclick="openPicksModal('mata', '${mKey}', '${tH} x ${tA}')" style="background:none;border:none;cursor:pointer;font-size:.7rem;padding:0;">👁️ Palpites</button>` : ''}
     </div>
     <div class="gm-row" style="padding:8px 8px 4px 8px;">
       <div class="gm-team gm-home">
@@ -644,5 +651,73 @@ function toast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
 }
+
+// ═══════════════════════════════════════════════════
+//  MODAL PALPITES
+// ═══════════════════════════════════════════════════
+window.openPicksModal = async function(type, refKey, title) {
+  const modal = document.getElementById('picks-modal');
+  const body = document.getElementById('picks-modal-body');
+  document.getElementById('picks-modal-title').textContent = title;
+  
+  modal.classList.remove('hidden');
+  body.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);">Carregando palpites...</div>';
+
+  if (!ALL_PLAYERS_CACHE) {
+    try {
+      const snaps = await getDocs(PLAYERS_COL);
+      ALL_PLAYERS_CACHE = [];
+      snaps.forEach(s => ALL_PLAYERS_CACHE.push({ id: s.id, ...s.data() }));
+    } catch(e) {
+      body.innerHTML = '<div style="text-align:center;color:var(--red);">Erro ao carregar.</div>';
+      return;
+    }
+  }
+
+  const sortedPlayers = [...ALL_PLAYERS_CACHE].sort((a,b) => (a.name||'').localeCompare(b.name||''));
+
+  if (sortedPlayers.length === 0) {
+    body.innerHTML = '<div style="text-align:center;color:var(--muted);">Nenhum apostador ainda.</div>';
+    return;
+  }
+
+  let html = '';
+  for (const p of sortedPlayers) {
+    let pick = null;
+    if (type === 'grupo') {
+      const [g, mIdx] = refKey.split('_');
+      pick = p.grupos?.[g]?.[mIdx];
+    } else if (type === 'mata') {
+      pick = p.mata?.[refKey];
+    }
+
+    const initial = (p.name || '?')[0].toUpperCase();
+    
+    if (pick && pick.h !== '' && pick.a !== '') {
+      html += `<div class="pick-item">
+        <div class="pick-name">
+          <div class="user-chip-avatar" style="width:24px;height:24px;font-size:12px;">${initial}</div>
+          ${p.name}
+        </div>
+        <div class="pick-score">${pick.h} <span style="font-size:0.75rem;color:var(--muted);font-weight:700;">X</span> ${pick.a}</div>
+      </div>`;
+    } else {
+      html += `<div class="pick-item">
+        <div class="pick-name" style="opacity:0.6;">
+          <div class="user-chip-avatar" style="width:24px;height:24px;font-size:12px;background:var(--muted);">${initial}</div>
+          ${p.name}
+        </div>
+        <div class="pick-missing">Não palpitou</div>
+      </div>`;
+    }
+  }
+
+  body.innerHTML = html;
+};
+
+window.closePicksModal = function(e) {
+  if (e && e.target !== e.currentTarget && !e.target.classList.contains('modal-close')) return;
+  document.getElementById('picks-modal').classList.add('hidden');
+};
 
 init();
