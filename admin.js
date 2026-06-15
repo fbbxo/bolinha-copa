@@ -434,3 +434,110 @@ function toast(msg) {
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
 }
+
+// ── AUTO-GERAR MATA-MATA ──
+window.generateMataFromStandings = async function() {
+  if (!confirm("Isso vai substituir os confrontos da Rodada de 32 com base na classificação atual da Fase de Grupos. Deseja continuar?")) return;
+
+  const standings = {};
+  let allThirds = [];
+
+  for (const g of GROUP_KEYS) {
+    const teams = DEFAULT_GROUPS[g];
+    const res = S.results.grupos?.[g] || {};
+    
+    let stats = teams.map(t => ({ team: t, group: g, p: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }));
+    const getStat = t => stats.find(s => s.team === t);
+    
+    const allMatchesDef = [ [0,1], [2,3], [0,2], [1,3], [0,3], [1,2] ];
+    
+    for (let i = 0; i < 6; i++) {
+      const match = allMatchesDef[i];
+      const tH = teams[match[0]];
+      const tA = teams[match[1]];
+      const r = res[`m${i}`];
+      
+      if (r && r.h !== '' && r.a !== '') {
+        const hGoals = parseInt(r.h);
+        const aGoals = parseInt(r.a);
+        if (!isNaN(hGoals) && !isNaN(aGoals)) {
+          const sH = getStat(tH);
+          const sA = getStat(tA);
+          
+          sH.j++; sA.j++;
+          sH.gp += hGoals; sH.gc += aGoals;
+          sA.gp += aGoals; sA.gc += hGoals;
+          
+          if (hGoals > aGoals) {
+            sH.v++; sA.d++; sH.p += 3;
+          } else if (aGoals > hGoals) {
+            sA.v++; sH.d++; sA.p += 3;
+          } else {
+            sH.e++; sA.e++; sH.p += 1; sA.p += 1;
+          }
+        }
+      }
+    }
+    
+    stats.forEach(s => s.sg = s.gp - s.gc);
+    stats.sort((a, b) => {
+      if (b.p !== a.p) return b.p - a.p;
+      if (b.sg !== a.sg) return b.sg - a.sg;
+      if (b.gp !== a.gp) return b.gp - a.gp;
+      return a.team.localeCompare(b.team);
+    });
+    
+    standings[g] = stats;
+    allThirds.push(stats[2]);
+  }
+
+  allThirds.sort((a, b) => {
+    if (b.p !== a.p) return b.p - a.p;
+    if (b.sg !== a.sg) return b.sg - a.sg;
+    if (b.gp !== a.gp) return b.gp - a.gp;
+    return a.team.localeCompare(b.team);
+  });
+  
+  const top8Thirds = allThirds.slice(0, 8);
+
+  const newR32 = { ...(S.matchups.r32 || {}) };
+  const getTeam = (g, pos) => standings[g]?.[pos - 1]?.team || '';
+
+  newR32.m2 = { a: getTeam('A', 2), b: getTeam('B', 2) };
+  newR32.m3 = { a: getTeam('F', 1), b: getTeam('C', 2) };
+  newR32.m4 = { a: getTeam('K', 2), b: getTeam('L', 2) };
+  newR32.m5 = { a: getTeam('H', 1), b: getTeam('J', 2) };
+  newR32.m8 = { a: getTeam('C', 1), b: getTeam('F', 2) };
+  newR32.m9 = { a: getTeam('E', 2), b: getTeam('I', 2) };
+  newR32.m12 = { a: getTeam('J', 1), b: getTeam('H', 2) };
+  newR32.m13 = { a: getTeam('D', 2), b: getTeam('G', 2) };
+
+  const thirdSlots = [
+    { m: 0, host: getTeam('E', 1) },
+    { m: 1, host: getTeam('I', 1) },
+    { m: 6, host: getTeam('D', 1) },
+    { m: 7, host: getTeam('G', 1) },
+    { m: 10, host: getTeam('A', 1) },
+    { m: 11, host: getTeam('L', 1) },
+    { m: 14, host: getTeam('B', 1) },
+    { m: 15, host: getTeam('K', 1) }
+  ];
+
+  // Preenche apenas o mandante (1º lugar) das vagas que receberão os 3º colocados.
+  // Deixa o adversário vazio (ou mantém o que já estava) para o admin preencher manualmente.
+  for (let i = 0; i < 8; i++) {
+    const slotInfo = thirdSlots[i];
+    const currentOpponent = newR32[`m${slotInfo.m}`]?.b || '';
+    newR32[`m${slotInfo.m}`] = { a: slotInfo.host, b: currentOpponent };
+  }
+
+  const matchups = { ...S.matchups, r32: newR32 };
+  try {
+    await setDoc(MAIN_DOC, { matchups }, { merge: true });
+    S.matchups = matchups;
+    renderMataMatches();
+    toast('✅ Primeiros e Segundos lugares preenchidos! Escolha os 3º lugares manualmente.');
+  } catch(e) {
+    toast('❌ Erro: '+e.message);
+  }
+};

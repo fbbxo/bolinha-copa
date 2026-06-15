@@ -415,3 +415,61 @@ main { max-width: 960px; margin: 0 auto; padding: 1.5rem 1rem 5rem; }
   .mata-team-name { font-size: .72rem; }
   .rank-pts { font-size: 1.5rem; }
 }
+
+/* ── CLASSIFICAÇÃO ── */
+.classificacao-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 14px;
+}
+.class-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1.5px solid var(--border);
+  overflow: hidden;
+}
+.class-header {
+  background: var(--navy);
+  color: #fff;
+  padding: .65rem 1rem;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: .5px;
+}
+.class-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .8rem;
+  text-align: center;
+}
+.class-table th {
+  background: var(--light);
+  color: var(--muted);
+  font-weight: 700;
+  padding: .5rem;
+  border-bottom: 1px solid var(--border);
+}
+.class-table td {
+  padding: .6rem .5rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-weight: 600;
+}
+.class-table tr:last-child td {
+  border-bottom: none;
+}
+.class-table tbody tr:nth-child(1),
+.class-table tbody tr:nth-child(2) {
+  background: #f0fdf4;
+}
+.class-table tbody tr:nth-child(1) td:first-child,
+.class-table tbody tr:nth-child(2) td:first-child {
+  border-left: 3px solid var(--green);
+}
+.class-team-col {
+  text-align: left !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

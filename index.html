@@ -7,7 +7,7 @@
   <title>Bolinha Copa 2026</title>
   <link rel="icon" href="logo.avif" type="image/avif">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/6.6.6/css/flag-icons.min.css">
-  <link rel="stylesheet" href="app.css?v=1.1">
+  <link rel="stylesheet" href="app.css?v=1.2">
 </head>
 
 <body>
@@ -68,6 +68,7 @@
     </div>
     <div class="tabs">
       <button class="tab active" onclick="showTab('grupos',this)">⚽ Grupos</button>
+      <button class="tab" onclick="showTab('classificacao',this)">📋 Classificação</button>
       <button class="tab" onclick="showTab('mata',this)">🏆 Mata-Mata</button>
       <button class="tab" onclick="showTab('placar',this)">📊 Placar</button>
     </div>
@@ -92,6 +93,15 @@
       <div style="text-align:center;margin-top:1.5rem;">
         <button class="btn btn-gold" id="grupos-save-btn" onclick="saveGrupos()">💾 Salvar apostas dos grupos</button>
       </div>
+    </section>
+
+    <!-- CLASSIFICAÇÃO -->
+    <section id="classificacao" class="section">
+      <div class="sec-head">
+        <h2>📋 Classificação</h2>
+        <p>Pontuação real da Fase de Grupos</p>
+      </div>
+      <div id="classificacao-render"></div>
     </section>
 
     <!-- MATA-MATA -->
@@ -140,7 +150,7 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script src="app.js?v=1.1" type="module"></script>
+  <script src="app.js?v=1.2" type="module"></script>
 </body>
 
 </html>

@@ -213,6 +213,7 @@ window.doLogout = function() {
 // ═══════════════════════════════════════════════════
 function renderAll() {
   renderGrupos();
+  renderClassificacao();
   renderMata();
   renderPlacar();
 }
@@ -375,6 +376,103 @@ window.saveGrupos = async function() {
 };
 
 
+
+// ═══════════════════════════════════════════════════
+//  CLASSIFICAÇÃO
+// ═══════════════════════════════════════════════════
+window.renderClassificacao = function() {
+  const el = document.getElementById('classificacao-render');
+  if (!el) return;
+  
+  let html = '<div class="classificacao-grid">';
+  
+  for (const g of GROUP_KEYS) {
+    const teams = S.groups[g] || DEFAULT_GROUPS[g];
+    const res = S.results.grupos?.[g] || {};
+    
+    let stats = teams.map(t => ({ team: t, p: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }));
+    const getStat = t => stats.find(s => s.team === t);
+    
+    const allMatchesDef = [ [0,1], [2,3], [0,2], [1,3], [0,3], [1,2] ];
+    
+    for (let i = 0; i < 6; i++) {
+      const match = allMatchesDef[i];
+      const tH = teams[match[0]];
+      const tA = teams[match[1]];
+      const r = res[`m${i}`];
+      
+      if (r && r.h !== '' && r.a !== '') {
+        const hGoals = parseInt(r.h);
+        const aGoals = parseInt(r.a);
+        if (!isNaN(hGoals) && !isNaN(aGoals)) {
+          const sH = getStat(tH);
+          const sA = getStat(tA);
+          
+          sH.j++; sA.j++;
+          sH.gp += hGoals; sH.gc += aGoals;
+          sA.gp += aGoals; sA.gc += hGoals;
+          
+          if (hGoals > aGoals) {
+            sH.v++; sA.d++; sH.p += 3;
+          } else if (aGoals > hGoals) {
+            sA.v++; sH.d++; sA.p += 3;
+          } else {
+            sH.e++; sA.e++; sH.p += 1; sA.p += 1;
+          }
+        }
+      }
+    }
+    
+    stats.forEach(s => s.sg = s.gp - s.gc);
+    
+    stats.sort((a, b) => {
+      if (b.p !== a.p) return b.p - a.p;
+      if (b.sg !== a.sg) return b.sg - a.sg;
+      if (b.gp !== a.gp) return b.gp - a.gp;
+      return a.team.localeCompare(b.team);
+    });
+    
+    let rows = stats.map((s, idx) => `
+      <tr>
+        <td class="class-team-col">
+          <span style="font-size:0.7rem; color:var(--muted); font-weight:800; width:12px; text-align:center;">${idx+1}</span>
+          ${flag(s.team, 18)} 
+          <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px;">${s.team}</span>
+        </td>
+        <td style="font-weight:800; color:var(--navy);">${s.p}</td>
+        <td>${s.j}</td>
+        <td>${s.v}</td>
+        <td>${s.e}</td>
+        <td>${s.d}</td>
+        <td>${s.sg}</td>
+      </tr>
+    `).join('');
+    
+    html += `
+      <div class="class-card">
+        <div class="class-header">GRUPO ${g}</div>
+        <table class="class-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;">Seleção</th>
+              <th title="Pontos">P</th>
+              <th title="Jogos">J</th>
+              <th title="Vitórias">V</th>
+              <th title="Empates">E</th>
+              <th title="Derrotas">D</th>
+              <th title="Saldo de Gols">SG</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+  html += '</div>';
+  el.innerHTML = html;
+};
 
 // ═══════════════════════════════════════════════════
 //  MATA-MATA
@@ -624,6 +722,7 @@ window.showTab = function(id, btn) {
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
   if (id === 'placar') renderPlacar();
+  if (id === 'classificacao') renderClassificacao();
 };
 
 function showLoading(v) {
