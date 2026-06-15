@@ -486,7 +486,9 @@ window.renderClassificacao = function() {
         <td>${s.v}</td>
         <td>${s.e}</td>
         <td>${s.d}</td>
-        <td>${s.sg}</td>
+        <td>${s.gp}</td>
+        <td>${s.gc}</td>
+        <td style="font-weight:700;">${s.sg}</td>
       </tr>
     `).join('');
     
@@ -502,6 +504,8 @@ window.renderClassificacao = function() {
               <th title="Vitórias">V</th>
               <th title="Empates">E</th>
               <th title="Derrotas">D</th>
+              <th title="Gols Pró">GP</th>
+              <th title="Gols Contra">GC</th>
               <th title="Saldo de Gols">SG</th>
             </tr>
           </thead>
