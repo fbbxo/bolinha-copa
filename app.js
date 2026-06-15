@@ -426,9 +426,51 @@ window.renderClassificacao = function() {
     stats.forEach(s => s.sg = s.gp - s.gc);
     
     stats.sort((a, b) => {
+      // 0. Pontos
       if (b.p !== a.p) return b.p - a.p;
+      
+      // 1. Saldo de Gols em todos os jogos
       if (b.sg !== a.sg) return b.sg - a.sg;
+      
+      // 2. Gols Pró em todos os jogos
       if (b.gp !== a.gp) return b.gp - a.gp;
+      
+      // Dados para o Confronto Direto
+      let directP_A = 0, directP_B = 0;
+      let directSG_A = 0, directSG_B = 0;
+      let directGP_A = 0, directGP_B = 0;
+      
+      for (let i = 0; i < 6; i++) {
+        const match = allMatchesDef[i];
+        const tH = teams[match[0]];
+        const tA = teams[match[1]];
+        if ((tH === a.team && tA === b.team) || (tH === b.team && tA === a.team)) {
+          const r = res[`m${i}`];
+          if (r && r.h !== '' && r.a !== '') {
+            const hG = parseInt(r.h), aG = parseInt(r.a);
+            if (tH === a.team) {
+               directGP_A = hG; directGP_B = aG;
+               directSG_A = hG - aG; directSG_B = aG - hG;
+               if (hG > aG) directP_A = 3; else if (aG > hG) directP_B = 3; else { directP_A = 1; directP_B = 1; }
+            } else {
+               directGP_A = aG; directGP_B = hG;
+               directSG_A = aG - hG; directSG_B = hG - aG;
+               if (aG > hG) directP_A = 3; else if (hG > aG) directP_B = 3; else { directP_A = 1; directP_B = 1; }
+            }
+          }
+        }
+      }
+      
+      // 3. Confronto Direto: Pontos
+      if (directP_B !== directP_A) return directP_B - directP_A;
+      
+      // 4. Confronto Direto: Saldo de Gols
+      if (directSG_B !== directSG_A) return directSG_B - directSG_A;
+      
+      // 5. Confronto Direto: Gols Pró
+      if (directGP_B !== directGP_A) return directGP_B - directGP_A;
+
+      // 6. Sorteio (Ordem Alfabética)
       return a.team.localeCompare(b.team);
     });
     
