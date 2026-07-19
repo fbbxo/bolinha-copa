@@ -660,7 +660,7 @@ window.saveMata = async function() {
 //  PONTUAÇÃO
 // ═══════════════════════════════════════════════════
 function calcScore(player) {
-  let pts = 0, details = { grupos: 0, mata: 0 };
+  let pts = 0, details = { grupos: 0, mata: 0, exatos: 0 };
 
   // Grupos
   for (const g of GROUP_KEYS) {
@@ -675,7 +675,7 @@ function calcScore(player) {
         const pH = parseInt(pick.h), pA = parseInt(pick.a);
         if (!isNaN(pH) && !isNaN(pA) && !isNaN(rH) && !isNaN(rA)) {
           if (rH === pH && rA === pA) {
-             pts += 3; details.grupos += 3;
+             pts += 3; details.grupos += 3; details.exatos += 1;
           } else {
              const resWin = rH > rA ? 1 : (rH < rA ? -1 : 0);
              const pickWin = pH > pA ? 1 : (pH < pA ? -1 : 0);
@@ -700,7 +700,7 @@ function calcScore(player) {
         const pH = parseInt(pick.h), pA = parseInt(pick.a);
         if (!isNaN(pH) && !isNaN(pA) && !isNaN(rH) && !isNaN(rA)) {
           if (rH === pH && rA === pA) {
-            pts += 3; details.mata += 3;
+            pts += 3; details.mata += 3; details.exatos += 1;
           } else {
             const resWin = rH > rA ? 1 : (rH < rA ? -1 : 0);
             const pickWin = pH > pA ? 1 : (pH < pA ? -1 : 0);
@@ -729,7 +729,7 @@ window.renderPlacar = async function() {
 
     const ranked = players
       .map(p => ({ ...p, score: calcScore(p) }))
-      .sort((a,b) => b.score.pts - a.score.pts || b.score.details.mata - a.score.details.mata);
+      .sort((a,b) => b.score.pts - a.score.pts || b.score.details.exatos - a.score.details.exatos || b.score.details.mata - a.score.details.mata);
 
     if (ranked.length === 0) {
       el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);">Nenhum apostador ainda.</div>';
@@ -746,7 +746,7 @@ window.renderPlacar = async function() {
         <div class="rank-avatar">${p.name?.[0]?.toUpperCase()||'?'}</div>
         <div class="rank-info">
           <div class="rank-name">${p.name}${isMe?' (você)':''}</div>
-          <div class="rank-detail">Grupos: ${details.grupos} · Mata-mata: ${details.mata}</div>
+          <div class="rank-detail">Na mosca: ${details.exatos} · Mata-mata: ${details.mata} · Grupos: ${details.grupos}</div>
         </div>
         <div>
           <div class="rank-pts">${pts}</div>
